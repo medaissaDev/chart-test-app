@@ -20,6 +20,7 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import moment from "moment";
 
 ChartJS.register(
   CategoryScale,
@@ -78,8 +79,7 @@ const Chart = () => {
   useEffect(() => {
     if (data && data.length > 0) {
       setSelectedId(data[0].id);
-      setSelectedCode(data[0].code);
-      setLastSelected(data[0].code);
+      setLastSelected(data[0].id);
       setIdList(getIds(data));
       setCodeList(getCodes(data));
       setLabels(monthLabels);
@@ -92,7 +92,9 @@ const Chart = () => {
     for (let i = 0; i < data.length; i++) {
       const element = data[i];
       datasets.push({
-        label: `${element.code}`,
+        label: `${
+          type === "year" ? moment(element.date).format("MMM") + ": " : ""
+        } ${element.code}`,
         data: updateLabelsByAggregation(element, type),
         backgroundColor: "rgba(53, 162, 235, 0.5)",
         borderColor: "rgba(12, 150, 235, 0.5)",
@@ -165,6 +167,7 @@ const Chart = () => {
                     value={selectedCode}
                     onChange={codeChanged}
                   >
+                    <option>...</option>
                     {codeList.map((code) => (
                       <option key={code} value={code}>
                         {code}
