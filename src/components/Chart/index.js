@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import "./Chart.scss";
 import {
   getData,
-  updateLabelsByAggregation,
   getIds,
   getCodes,
   getDataById,
   getDataByCode,
   getSelectedData,
+  getDataSets,
 } from "../../services";
 import {
   Chart as ChartJS,
@@ -20,7 +20,6 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import moment from "moment";
 
 ChartJS.register(
   CategoryScale,
@@ -88,21 +87,9 @@ const Chart = () => {
   }, [data]);
 
   const updateChart = (chartLabels, data, type = "month") => {
-    let datasets = [];
-    for (let i = 0; i < data.length; i++) {
-      const element = data[i];
-      datasets.push({
-        label: `${
-          type === "year" ? moment(element.date).format("MMM") + ": " : ""
-        } ${element.code}`,
-        data: updateLabelsByAggregation(element, type),
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
-        borderColor: "rgba(12, 150, 235, 0.5)",
-      });
-    }
     setChartData({
       labels: chartLabels,
-      datasets: datasets,
+      datasets: getDataSets(data, type),
     });
   };
 
@@ -123,12 +110,12 @@ const Chart = () => {
     setAggregateBy(value);
     switch (value) {
       case "year":
-        updateChart(yearLabels, getSelectedData(data, lastSelected), value);
+        updateChart(yearLabels, getSelectedData(lastSelected, value), value);
         setLabels(yearLabels);
         break;
 
       default:
-        updateChart(monthLabels, getSelectedData(data, lastSelected));
+        updateChart(monthLabels, getSelectedData(lastSelected));
         setLabels(monthLabels);
         break;
     }

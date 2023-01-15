@@ -16,6 +16,44 @@ export const getDataByCode = (data, code) => {
   return data.filter((d) => d.code === code);
 };
 
+export const getDataSets = (data, type) => {
+  var dataSets = [];
+  for (let i = 0; i < data.length; i++) {
+    const element = data[i];
+    var objIndex = dataSets.findIndex((obj) => obj.label === element.code);
+    if (objIndex !== -1) {
+      dataSets[objIndex].data = updateDataSetArray(
+        updateLabelsByAggregation(element, type),
+        dataSets[objIndex].data
+      );
+    } else {
+      dataSets.push({
+        label: `${element.code}`,
+        data: updateLabelsByAggregation(element, type),
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        borderColor: "rgba(12, 150, 235, 0.5)",
+      });
+    }
+  }
+  return dataSets;
+};
+
+export const updateDataSetArray = (firstArray, secondArray) => {
+  var array = [];
+  for (let i = 0; i < firstArray.length; i++) {
+    let firstArrayElm = firstArray[i];
+    let secondArrayElm = secondArray[i];
+    if (firstArrayElm !== 0 && secondArrayElm !== 0) {
+      var sum = firstArrayElm + secondArrayElm;
+      array.push(sum);
+    } else if (firstArrayElm !== 0) array.push(firstArrayElm);
+    else if (secondArray && secondArray.length > 0 && secondArrayElm !== 0)
+      array.push(secondArrayElm);
+    else array.push(0);
+  }
+  return array;
+};
+
 export const updateLabelsByAggregation = (data, type) => {
   var labels = [];
   var date;
@@ -38,8 +76,20 @@ export const updateLabelsByAggregation = (data, type) => {
   return labels;
 };
 
-export const getSelectedData = (data, id) => {
-  return data.filter((d) => d.id === id || d.code === id);
+export const getSelectedData = (id, type = "month") => {
+  var data = [...getData().filter((d) => d.id === id || d.code === id)];
+  if (data.length === 1 || type === "month") return data;
+  var result = [];
+  for (let i = 0; i < data.length; i++) {
+    let element = data[i];
+    var objIndex = result.findIndex((obj) => obj.code === element.code);
+    if (objIndex !== -1) {
+      result[objIndex].value = result[objIndex].value + element.value;
+    } else {
+      result.push(element);
+    }
+  }
+  return result;
 };
 
 export const getData = (_) => {
